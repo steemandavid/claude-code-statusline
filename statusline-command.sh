@@ -5,6 +5,8 @@ input=$(cat)
 user=$(whoami)
 hostname=$(hostname -s)
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // "'"$(pwd)"'"')
+# Show only top-level directory name
+cwd="/$(basename "$cwd")"
 
 # Get model display name
 model=$(echo "$input" | jq -r '.model.display_name // ""')
