@@ -7,7 +7,7 @@ A custom status bar for [Claude Code](https://docs.anthropic.com/en/docs/claude-
 | Backend | Format |
 |---------|--------|
 | **Anthropic Pro** | `Model | Cont: X% | Tok: XXk | user@host:path` |
-| **z.ai / GLM** | `Model | Cont: X% | GLM: MCP X% \| Tok X% | user@host:path` |
+| **z.ai / GLM** | `Model | Cont: X% | GLM: MCP X% \| Tok X%/Y% | user@host:path` |
 
 ### Color Scheme
 
@@ -83,7 +83,7 @@ The script detects which backend is active via environment variables:
 | Context window % | Claude Code statusLine JSON input |
 | Session tokens (Pro) | Claude Code statusLine JSON input (`total_input_tokens` + `total_output_tokens`) |
 | GLM MCP usage | Cached API response (`~/.glm-plan-usage-cache.json`) |
-| GLM token % | Cached API response (`~/.glm-plan-usage-cache.json`) |
+| GLM token % (5h / weekly) | Cached API response (`~/.glm-plan-usage-cache.json`) |
 
 ### GLM Usage Auto-Refresh
 

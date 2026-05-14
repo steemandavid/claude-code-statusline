@@ -24,13 +24,20 @@ update_script="$HOME/.claude/update-glm-usage-cache.mjs"
 if [ -f "$cache_file" ]; then
     mcp_used=$(jq -r '.mcp_used // 0' "$cache_file" 2>/dev/null)
     mcp_total=$(jq -r '.mcp_total // 1000' "$cache_file" 2>/dev/null)
-    token_percent=$(jq -r '.token_percent // 0' "$cache_file" 2>/dev/null)
+    token_5h=$(jq -r '.token_percent_5h // 0' "$cache_file" 2>/dev/null)
+    token_weekly=$(jq -r '.token_percent_weekly // 0' "$cache_file" 2>/dev/null)
+    # Fallback for old cache format
+    if [ "$token_5h" -eq 0 ] 2>/dev/null && [ "$token_weekly" -eq 0 ] 2>/dev/null; then
+        token_weekly=$(jq -r '.token_percent // 0' "$cache_file" 2>/dev/null)
+    fi
 
-    if [ "$mcp_used" -gt 0 ] 2>/dev/null || [ "$token_percent" -gt 0 ] 2>/dev/null; then
+    if [ "$mcp_used" -gt 0 ] 2>/dev/null || [ "$token_weekly" -gt 0 ] 2>/dev/null; then
         mcp_percent=$((mcp_used * 100 / mcp_total))
         glm_parts=()
         [ "$mcp_percent" -gt 0 ] 2>/dev/null && glm_parts+=("MCP ${mcp_percent}%")
-        [ "$token_percent" -gt 0 ] 2>/dev/null && glm_parts+=("Tok ${token_percent}%")
+        if [ "$token_5h" -gt 0 ] 2>/dev/null || [ "$token_weekly" -gt 0 ] 2>/dev/null; then
+            glm_parts+=("Tok ${token_5h}%/${token_weekly}%")
+        fi
         [ ${#glm_parts[@]} -gt 0 ] && glm_info=$(IFS='| '; echo "${glm_parts[*]}")
     fi
 

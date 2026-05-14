@@ -82,12 +82,17 @@ const fetchQuota = () => {
 const updateCache = (quotaData) => {
   let mcpUsed = 0;
   let mcpTotal = 1000;
-  let tokenPercent = 0;
+  let tokenPercent5h = 0;
+  let tokenPercentWeekly = 0;
 
   if (quotaData && quotaData.limits) {
     for (const item of quotaData.limits) {
       if (item.type === 'TOKENS_LIMIT') {
-        tokenPercent = item.percentage || 0;
+        if (item.unit === 3) {
+          tokenPercent5h = item.percentage || 0;
+        } else if (item.unit === 6) {
+          tokenPercentWeekly = item.percentage || 0;
+        }
       }
       if (item.type === 'TIME_LIMIT') {
         mcpUsed = item.currentValue || 0;
@@ -99,12 +104,13 @@ const updateCache = (quotaData) => {
   const cache = {
     mcp_used: mcpUsed,
     mcp_total: mcpTotal,
-    token_percent: tokenPercent,
+    token_percent_5h: tokenPercent5h,
+    token_percent_weekly: tokenPercentWeekly,
     last_updated: new Date().toISOString()
   };
 
   fs.writeFileSync(cacheFile, JSON.stringify(cache, null, 2));
-  console.log(`Cache updated: MCP ${mcpUsed}/${mcpTotal} (${Math.round(mcpUsed * 100 / mcpTotal)}%), Tokens ${tokenPercent}%`);
+  console.log(`Cache updated: MCP ${mcpUsed}/${mcpTotal} (${Math.round(mcpUsed * 100 / mcpTotal)}%), Tok ${tokenPercent5h}%/${tokenPercentWeekly}%`);
 };
 
 const run = async () => {
