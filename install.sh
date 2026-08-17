@@ -27,6 +27,9 @@ chmod +x "$CLAUDE_DIR/update-claude-pro-usage.sh"
 cp "$SCRIPT_DIR/init-glm-usage-cache.sh" "$CLAUDE_DIR/init-glm-usage-cache.sh"
 chmod +x "$CLAUDE_DIR/init-glm-usage-cache.sh"
 
+cp "$SCRIPT_DIR/init-anthropic-usage-cache.sh" "$CLAUDE_DIR/init-anthropic-usage-cache.sh"
+chmod +x "$CLAUDE_DIR/init-anthropic-usage-cache.sh"
+
 # Update settings.json if needed
 SETTINGS="$CLAUDE_DIR/settings.json"
 if [ -f "$SETTINGS" ]; then
@@ -54,3 +57,7 @@ echo "Done. Restart Claude Code to see the new status line."
 echo ""
 echo "Optional: Initialize GLM usage cache manually:"
 echo "  bash ~/.claude/init-glm-usage-cache.sh <mcp_used> <mcp_total> <token_percent>"
+echo ""
+echo "Optional: Initialize Anthropic usage cache manually:"
+echo "  bash ~/.claude/init-anthropic-usage-cache.sh <5h_percent> <weekly_percent>"
+echo "  (Check your usage at https://claude.ai/settings/usage)"
