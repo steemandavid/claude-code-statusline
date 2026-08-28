@@ -42,9 +42,37 @@ against the official statusline docs). Installed version here is 2.1.250.
 
 - `rate_limits` windows can be independently absent, and a window is dropped
   once its `resets_at` passes — absent windows render as `0`.
-- Values may be floats (e.g. `23.5`); displayed as-is.
+- ~~Values may be floats (e.g. `23.5`); displayed as-is.~~ — superseded later
+  today: values are now rounded to whole percent (see next section).
 - The GLM branch was untouched; `update-claude-pro-usage.sh` kept as
   reference (fetches org/tier info only, still no quota API).
 - The z.ai backend detection quirk observed while testing: `ANTHROPIC_BASE_URL`
   is set inside Claude Code sessions running on the GLM backend, so testing
   the Anthropic branch requires `env -u ANTHROPIC_BASE_URL`.
+
+## 2026-08-28 — Round Anthropic token percentages to whole numbers
+
+The status line showed float artifacts from the live rate-limit JSON, e.g.
+`Tok 28.000000000000004%/56.00000000000001%`. The values are computed
+upstream as `used/limit*100` in floating point, so artifacts like this are
+routine rather than exceptional.
+
+### Changes
+
+- `statusline-command.sh` (repo): the two Anthropic extractions now pipe
+  through jq's `round` filter:
+  `.rate_limits.five_hour.used_percentage // 0 | round` (and the
+  `seven_day` equivalent), so the output is always a whole percent
+  (`Tok 28%/56%`).
+- The GLM branch was left alone — its cache percentages are already integers
+  from the API, and the bash `-gt` comparisons there assume integers anyway.
+
+### Verification
+
+Mock payload with `28.000000000000004` / `56.00000000000001` under
+`env -u ANTHROPIC_BASE_URL` renders `Tok 28%/56%`.
+
+### Note
+
+- The installed copy under `~/.claude/` needs a re-run of `install.sh`
+  (or a manual copy) to pick up the fix.

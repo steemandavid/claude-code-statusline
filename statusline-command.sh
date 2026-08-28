@@ -65,8 +65,8 @@ else
     # (Claude Code v2.1.x: rate_limits.five_hour / rate_limits.seven_day,
     # populated for Claude.ai subscribers after the first API response).
     if [ -n "$(echo "$input" | jq -r '.rate_limits // empty')" ]; then
-        a_token_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // 0')
-        a_token_weekly=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // 0')
+        a_token_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // 0 | round')
+        a_token_weekly=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // 0 | round')
         anthropic_info="Tok ${a_token_5h}%/${a_token_weekly}%"
     fi
 
