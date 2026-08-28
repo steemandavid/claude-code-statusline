@@ -6,8 +6,8 @@ A custom status bar for [Claude Code](https://docs.anthropic.com/en/docs/claude-
 
 | Backend | Format |
 |---------|--------|
-| **Anthropic Pro** (with cache) | `Model | Cont: X% | Tok X%/Y% | user@host:path` |
-| **Anthropic Pro** (no cache) | `Model | Cont: X% | Tok: XXk | user@host:path` |
+| **Anthropic Pro** (rate limits available) | `Model | Cont: X% | Tok X%/Y% | user@host:path` |
+| **Anthropic Pro** (no subscription rate limits) | `Model | Cont: X% | Tok: XXk | user@host:path` |
 | **z.ai / GLM** | `Model | Cont: X% | GLM: MCP X% \| Tok X%/Y% | user@host:path` |
 
 ### Color Scheme
@@ -29,7 +29,6 @@ A custom status bar for [Claude Code](https://docs.anthropic.com/en/docs/claude-
 | `update-glm-usage-cache.mjs` | Fetches z.ai/GLM quota from API, writes to cache file |
 | `update-claude-pro-usage.sh` | Fetches Anthropic Pro account/org info (for reference; quota not available via API) |
 | `init-glm-usage-cache.sh` | Manually initialize GLM usage cache with given values |
-| `init-anthropic-usage-cache.sh` | Manually initialize Anthropic usage cache from [claude.ai/settings/usage](https://claude.ai/settings/usage) |
 | `install.sh` | Installs all scripts to `~/.claude/` and configures `settings.json` |
 
 ## Requirements
@@ -54,7 +53,7 @@ If you prefer to set up manually:
 
 1. Copy scripts to `~/.claude/`:
    ```bash
-   cp statusline-command.sh update-glm-usage-cache.mjs update-claude-pro-usage.sh init-glm-usage-cache.sh init-anthropic-usage-cache.sh ~/.claude/
+   cp statusline-command.sh update-glm-usage-cache.mjs update-claude-pro-usage.sh init-glm-usage-cache.sh ~/.claude/
    chmod +x ~/.claude/statusline-command.sh
    ```
 
@@ -75,11 +74,7 @@ If you prefer to set up manually:
 bash ~/.claude/init-glm-usage-cache.sh <mcp_used> <mcp_total> <weekly_percent>
 ```
 
-**Anthropic Pro (manual — no API available):**
-```bash
-bash ~/.claude/init-anthropic-usage-cache.sh <5h_percent> <weekly_percent>
-```
-Check your usage at [claude.ai/settings/usage](https://claude.ai/settings/usage) and enter the percentages.
+Anthropic usage needs no cache — it is read live from the statusLine JSON input.
 
 ## How It Works
 
@@ -99,7 +94,7 @@ The script detects which backend is active via environment variables:
 | Session tokens (Pro fallback) | Claude Code statusLine JSON input (`total_input_tokens` + `total_output_tokens`) |
 | GLM MCP usage | Cached API response (`~/.glm-plan-usage-cache.json`) |
 | GLM token % (5h / weekly) | Cached API response (`~/.glm-plan-usage-cache.json`) |
-| Anthropic token % (5h / weekly) | Manual cache (`~/.anthropic-usage-cache.json`) |
+| Anthropic token % (5h / weekly) | Claude Code statusLine JSON input (`rate_limits.five_hour` / `rate_limits.seven_day`) |
 
 ### GLM Usage Auto-Refresh
 
@@ -107,7 +102,7 @@ When running on the z.ai backend, the status line script checks if the GLM usage
 
 ### Anthropic Pro Usage
 
-Anthropic does not expose a public API for subscription quota usage. The status line reads from a manual cache file (`~/.anthropic-usage-cache.json`) that you update by checking [claude.ai/settings/usage](https://claude.ai/settings/usage). If no cache exists, live session token counts are shown instead.
+Claude Code (v2.1.x) passes live rate-limit usage in the statusLine JSON input (`rate_limits.five_hour.used_percentage` / `rate_limits.seven_day.used_percentage`, available to Claude.ai subscribers after the first API response of a session). The status line reads these directly, so no cache or manual updates are needed. If the fields are absent (e.g. API-key usage without subscription), live session token counts are shown instead.
 
 ## License
 

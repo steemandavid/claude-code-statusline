@@ -61,15 +61,13 @@ if [ "$is_zai" = true ]; then
         fi
     fi
 else
-    # Anthropic Pro backend — read Anthropic usage cache (manual)
-    anthropic_cache="$HOME/.anthropic-usage-cache.json"
-
-    if [ -f "$anthropic_cache" ]; then
-        a_token_5h=$(jq -r '.token_percent_5h // 0' "$anthropic_cache" 2>/dev/null)
-        a_token_weekly=$(jq -r '.token_percent_weekly // 0' "$anthropic_cache" 2>/dev/null)
-        if [ "$a_token_5h" -gt 0 ] 2>/dev/null || [ "$a_token_weekly" -gt 0 ] 2>/dev/null; then
-            anthropic_info="Tok ${a_token_5h}%/${a_token_weekly}%"
-        fi
+    # Anthropic Pro/Max backend — live rate limits from the statusline JSON
+    # (Claude Code v2.1.x: rate_limits.five_hour / rate_limits.seven_day,
+    # populated for Claude.ai subscribers after the first API response).
+    if [ -n "$(echo "$input" | jq -r '.rate_limits // empty')" ]; then
+        a_token_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // 0')
+        a_token_weekly=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // 0')
+        anthropic_info="Tok ${a_token_5h}%/${a_token_weekly}%"
     fi
 
     # Fallback: show raw session tokens if no Anthropic cache
