@@ -76,3 +76,41 @@ Mock payload with `28.000000000000004` / `56.00000000000001` under
 
 - The installed copy under `~/.claude/` needs a re-run of `install.sh`
   (or a manual copy) to pick up the fix.
+
+## 2026-08-28 (later) — Fresh-session "missing limits" investigated; symlink repointed at repo
+
+### Investigation: limits absent in fresh sessions (not a bug)
+
+After the rounding fix, a fresh session showed only
+`Opus 5 | john@john-ai:/BRMD2026` — no `Cont:` and no `Tok`. Debugging by
+temporarily logging the raw statusLine JSON to `~/.claude/statusline-debug.log`
+and reproducing confirmed: **`rate_limits` and `context_window` are absent
+from the payload until the first API response of a session.** Once one
+message gets a response, everything renders normally. Expected Claude Code
+behavior; debug logging removed afterwards.
+
+### Root cause of the rounding fix "not working" live: symlink drift
+
+`~/.claude/statusline-command.sh` was a symlink to
+`~/claudecode/projects/claudecode-sync/claude/statusline-command.sh`
+(Syncthing dir), **not** the `install.sh` target — so repo fixes never
+reached the live status line. The synced copy had drifted: it contained the
+`rate_limits` code but not the `round` fix.
+
+### Changes
+
+- `~/.claude/statusline-command.sh` symlink repointed at the repo:
+  `~/claudecode/projects/claude-code-statusline/statusline-command.sh`.
+  Commits now go live immediately on this machine. Verified with a mock
+  payload (`Tok 28%/57%`).
+- `README.md`: added a note that fresh sessions render a bare status line
+  until the first API response (expected), and a deployment note about the
+  symlink setup.
+
+### Notes
+
+- Other machines may still consume the synced copy in
+  `claudecode-sync/claude/` — copy changes there if so; the sync dir is no
+  longer updated automatically from this repo.
+- Debug technique for future payload questions: `printf '%s\n' "$input" >> ~/.claude/statusline-debug.log`
+  right after `input=$(cat)`, reproduce, inspect, remove.

@@ -47,6 +47,12 @@ bash install.sh
 
 Restart Claude Code to see the new status line.
 
+> **Deployment note (this machine):** `~/.claude/statusline-command.sh` is a
+> symlink directly into this repo, so commits go live immediately here. The
+> Syncthing-managed copy in `~/claudecode/projects/claudecode-sync/claude/` is
+> no longer the live target on this machine — copy changes there if other
+> machines still consume that synced copy.
+
 ### Manual Setup
 
 If you prefer to set up manually:
@@ -103,6 +109,8 @@ When running on the z.ai backend, the status line script checks if the GLM usage
 ### Anthropic Pro Usage
 
 Claude Code (v2.1.x) passes live rate-limit usage in the statusLine JSON input (`rate_limits.five_hour.used_percentage` / `rate_limits.seven_day.used_percentage`, available to Claude.ai subscribers after the first API response of a session). The status line reads these directly, so no cache or manual updates are needed. If the fields are absent (e.g. API-key usage without subscription), live session token counts are shown instead.
+
+**Note:** in a brand-new session, `rate_limits` and `context_window` are absent from the payload until the first API response, so the status line renders as just `Model | user@host:path` — this is expected, not a bug.
 
 ## License
 
